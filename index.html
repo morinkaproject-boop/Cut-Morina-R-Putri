@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FOGGY IPS KELAS 7</title>
+    <style>
+        :root {
+            --bg-pond: #254c4c;
+            --bg-pond-bright: #2d5a50;
+            --water-color: #258374;
+            --lotus-green: #3caea3;
+            --lotus-correct: #2ecc71;
+            --lotus-wrong: #e74c3c;
+            --text-color: #ffffff;
+            --accent-color: #f1c40f;
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-pond);
+            color: var(--text-color);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* Ambient Environment */
+        .pond-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, var(--bg-pond) 0%, var(--bg-pond-bright) 100%);
+            z-index: -3;
+            overflow: hidden;
+        }
+
+        .water-ripple {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%);
+            animation: ripple 12s infinite linear;
+            top: -50%; left: -50%;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        @keyframes ripple {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.1); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        .fog-layer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            filter: blur(20px);
+            animation: fogMove 20s infinite ease-in-out;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        @keyframes fogMove {
+            0%, 100% { transform: translateX(-10%) translateY(0); }
+            50% { transform: translateX(10%) translateY(-5px); }
+        }
+
+        .rain-effect {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            display: none;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* App Wrapper & Header */
+        #app {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100vh;
+            position: relative;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            z-index: 20;
+            height: 60px;
+        }
+
+        h1.logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            text-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
+            letter-spacing: 1px;
+        }
+
+        .controls-top {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn-icon {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            padding: 8px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-icon:hover {
+            background: var(--accent-color);
+            color: #000;
+        }
+
+        .volume-slider {
+            width: 80px;
+            accent-color: var(--accent-color);
+            display: none;
+        }
+
+        .controls-top:hover .volume-slider {
+            display: block;
+        }
+
+        /* Main Menu Screen */
+        #menu-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            z-index: 15;
+            gap: 20px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .menu-title {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            animation: float 3s infinite ease-in-out;
+            color: #fff;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .btn-main {
+            background: linear-gradient(135deg, #3498db, #2bc48a);
+            border: none;
+            padding: 15px 25px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .btn-main:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(43, 196, 138, 0.5);
+        }
+
+        /* Leaderboard styling inside menu */
+        .mini-leaderboard {
+            background: rgba(0,0,0,0.4);
+            padding: 15px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 350px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+        .mini-leaderboard h3 { margin-bottom: 8px; color: var(--accent-color); }
+        .mini-leaderboard div { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+
+        /* Game Screen Arena */
+        #game-screen {
+            display: none;
+            flex: 1;
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 60px);
+            transition: all 0.5s ease-in-out;
+        }
+
+        /* Layout Grids Based on Modes */
+        .arena-container {
+            display: grid;
+            width: 100%;
+            height: 100%;
+            gap: 10px;
+            padding: 10px;
+            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* Mode classes dynamically injected */
+        .mode-solo { grid-template-columns: 1fr; }
+        .mode-duel { grid-template-columns: repeat(3, 1fr); }
+        .mode-squad { grid-template-columns: repeat(2, 2fr); grid-template-rows: repeat(2, 1fr); }
+
+        /* Player Panel */
+        .player-panel {
+            background: rgba(20, 40, 40, 0.6);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(3px);
+            transition: transform 0.4s ease, opacity 0.4s ease;
+        }
+
+        .player-label {
+            background: rgba(0,0,0,0.5);
+            text-align: center;
+            font-weight: bold;
+            padding: 5px;
+            font-size: 0.9rem;
+            color: var(--accent-color);
+            letter-spacing: 1px;
+        }
+
+        /* Panel Status Head */
+        .panel-status {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 15px;
+            background: rgba(0,0,0,0.2);
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        .status-life { color: #e74c3c; }
+        .status-timer { color: #f1c40f; }
+
+        /* Question Block */
+        .question-box {
+            padding: 15px;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.15);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Pond Visual Playing Space */
+        .playing-space {
+            flex: 1;
+            position: relative;
+            background: radial-gradient(circle at center, rgba(37, 131, 116, 0.4) 0%, transparent 70%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Frog Character Elements */
+        .frog-container {
+            position: absolute;
+            bottom: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+        }
+
+        .frog {
+            width: 60px;
+            height: 50px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            position: relative;
+            transition: transform 0.1s;
+        }
+
+        /* CSS Rendered Vector Frog Placeholder Graphics */
+        .frog-body {
+            width: 100%;
+            height: 100%;
+            border-radius: 50% 50% 45% 45%;
+            position: relative;
+            box-shadow: inset 0 -5px 10px rgba(0,0,0,0.2);
+        }
+        .frog-eye {
+            position: absolute;
+            top: -5px;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .frog-eye::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: black;
+            border-radius: 50%;
+        }
+        .frog-eye.left { left: 8px; }
+        .frog-eye.right { right: 8px; }
+        .frog-mouth {
+            position: absolute;
+            bottom: 12px;
+            left: 25%;
+            width: 50%;
+            height: 8px;
+            border-bottom: 3px solid #2c3e50;
+            border-radius: 50%;
+        }
+
+        /* Colors for different players */
+        .p1-frog .frog-body { background: #2ecc71; }
+        .p2-frog .frog-body { background: #3498db; }
+        .p3-frog .frog-body { background: #9b59b6; }
+        .p4-frog .frog-body { background: #e67e22; }
+
+        /* Frog Animations */
+        .frog.idle { animation: frogIdle 2s infinite ease-in-out; }
+        @keyframes frogIdle { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.9) scaleX(1.05); } }
+        
+        .frog.jump-anim { animation: frogJump 0.4s ease-out; }
+        @keyframes frogJump { 0% { transform: scale(1) translateY(0); } 50% { transform: scale(1.2) translateY(-40px); } 100% { transform: scale(1) translateY(0); } }
+
+        .frog.happy-anim { animation: frogHappy 0.6s 3; }
+        @keyframes frogHappy { 0%, 100% { transform: translateY(0) scaleY(1); } 50% { transform: translateY(-20px) scaleY(1.1); } }
+
+        .frog.fall-anim { animation: frogFall 1s forwards ease-in; }
+        @keyframes frogFall { 0% { transform: scale(1) rotate(0); } 50% { transform: scale(0.6) rotate(180deg) translateY(20px); opacity: 0.8; } 100% { transform: scale(0) rotate(360deg) translateY(50px); opacity: 0; } }
+
+        /* Lotus Pond Options Grid Layout */
+        .lotus-grid {
+            position: absolute;
+            bottom: 20px;
+            width: 90%;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            z-index: 2;
+        }
+
+        .lotus-leaf {
+            background: radial-gradient(circle at 70% 30%, #4cd137, #44bd32);
+            border-radius: 50% 60% 50% 70% / 50% 50% 60% 60%;
+            height: 65px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+            cursor: pointer;
+            box-shadow: 0 6px 0px #27ae60, 0 10px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            position: relative;
+        }
+
+        .lotus-leaf:active, .lotus-leaf.selected {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0px #27ae60, 0 5px 10px rgba(0,0,0,0.3);
+        }
+
+        /* Lotus States */
+        .lotus-leaf.correct {
+            background: radial-gradient(circle at 70% 30%, #2ecc71, #27ae60) !important;
+            box-shadow: 0 0 20px #2ecc71, 0 4px 0px #1e824c !important;
+            animation: pulseCorrect 0.4s infinite alternate;
+        }
+        @keyframes pulseCorrect { 0% { transform: scale(1); } 100% { transform: scale(1.03); } }
+
+        .lotus-leaf.wrong {
+            background: radial-gradient(circle at 70% 30%, #e74c3c, #c0392b) !important;
+            box-shadow: 0 4px 0px #962d22 !important;
+            animation: shakeWrong 0.4s ease-in-out;
+        }
+        @keyframes shakeWrong {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        .lotus-leaf.sink-away {
+            transform: translateY(150px) scale(0.5);
+            opacity: 0;
+            transition: all 0.8s ease-in;
+        }
+
+        /* Mobile Controls Layout for Multiplayers */
+        .mobile-controls-row {
+            display: none;
+            background: rgba(0,0,0,0.4);
+            padding: 8px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+        }
+        .btn-control {
+            background: #34495e;
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        .btn-control:active { background: #2c3e50; }
+
+        /* Splash Particle Effect Overlay */
+        .splash-overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 6;
+        }
+        .splash-particle {
+            position: absolute;
+            background: rgba(255,255,255,0.7);
+            border-radius: 50%;
+            animation: particleSplash 0.6s forwards ease-out;
+        }
+        @keyframes particleSplash {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; }
+        }
+
+        /* Game Over Screen Overlay */
+        #gameover-screen {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px);
+            z-index: 30;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* RESPONSIVE LAYOUT BREAKPOINTS */
+        
+        /* Tablet & Desktop Landscape defaults are highly handled by CSS Grid layout modes */
+        
+        /* Mobile Landscape */
+        @media (max-height: 500px) and (orientation: landscape) {
+            header { height: 45px; padding: 5px 15px; }
+            h1.logo { font-size: 1.1rem; }
+            .question-box { font-size: 0.9rem; min-height: 45px; padding: 5px; }
+            .lotus-grid { bottom: 5px; gap: 5px; }
+            .lotus-leaf { height: 42px; font-size: 0.75rem; padding: 4px; }
+            .frog-container { bottom: 15%; }
+            .frog { width: 45px; height: 35px; }
+            
+            /* Horizontal scrolling setup for multiplayer on thin landscape mobile screens */
+            .mode-duel { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; }
+            .mode-duel .player-panel { min-width: 85vw; scroll-snap-align: start; }
+            .mode-squad { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; }
+            .mode-squad .player-panel { min-width: 45vw; scroll-snap-align: start; }
+        }
+
+        /* Mobile Portrait */
+        @media (max-width: 767px) and (orientation: portrait) {
+            .mode-duel { grid-template-columns: 1fr; grid-template-rows: repeat(3, 1fr); overflow-y: auto; }
+            .mode-squad { grid-template-columns: 1fr; grid-template-rows: repeat(4, 1fr); overflow-y: auto; }
+            
+            .player-panel { min-height: 260px; }
+            .question-box { font-size: 0.95rem; }
+            .lotus-grid { bottom: 65px; }
+            .mobile-controls-row { display: grid; }
+            .frog-container { bottom: 120px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="pond-bg">
+        <div class="water-ripple"></div>
+        <div class="fog-layer"></div>
+        <div class="rain-effect" id="rain-zone"></div>
+    </div>
+
+    <div id="app">
+        <header>
+            <h1 class="logo" onclick="backToMenu()"> Belajar IPS Bersama Foggy</h1>
+            <div class="controls-top">
+                <button class="btn-icon" id="audio-toggle" onclick="toggleAudio()">🔊</button>
+                <input type="range" class="volume-slider" id="volume-control" min="0" max="1" step="0.1" value="0.5">
+                <button class="btn-icon" onclick="toggleFullscreen()">⛶</button>
+            </div>
+        </header>
+
+        <main id="menu-screen">
+            <div>
+                <h2 class="menu-title">🐸 FOGGY IPS KELAS 7</h2>
+                <p style="color: #bdc3c7; margin-bottom: 20px;">Lompat Ke Jawaban Benar, Kuasai Materi IPS!</p>
+            </div>
+            
+            <div class="menu-buttons">
+                <button class="btn-main" onclick="startGame('solo')">SOLO MODE (1 Player)</button>
+                <button class="btn-main" onclick="startGame('duel')" style="background: linear-gradient(135deg, #e67e22, #f1c40f);">DUEL MODE (3 Player)</button>
+                <button class="btn-main" onclick="startGame('squad')" style="background: linear-gradient(135deg, #9b59b6, #e74c3c);">SQUAD COMPETITION (4 Player)</button>
+            </div>
+
+            <div class="mini-leaderboard">
+                <h3>🏆 High Scores (Solo)</h3>
+                <div id="leaderboard-container">
+                    <p style="text-align: center; width: 100%; color:#aaa;">Belum ada record.</p>
+                </div>
+            </div>
+        </main>
+
+        <div id="game-screen">
+            <div class="arena-container" id="arena-box">
+                </div>
+        </div>
+
+        <div id="gameover-screen">
+            <h1 id="go-title" style="color: var(--accent-color); font-size: 2.5rem; margin-bottom: 20px;">Permainan Selesai!</h1>
+            <div id="go-body" style="margin-bottom: 30px; font-size: 1.2rem; max-width: 500px; line-height: 1.6;"></div>
+            <button class="btn-main" onclick="backToMenu()">Kembali ke Menu</button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA BANK SOAL IPS KELAS 7 (Geografi, Ekonomi, Sejarah) ---
+        const bankSoal = [
+            // Geografi
+            { q: "Secara geografis, Indonesia terletak di antara dua benua yaitu...", a: "Asia dan Afrika", b: "Asia dan Australia", c: "Amerika dan Eropa", d: "Australia dan Afrika", ans: "b" },
+            { q: "Garis khayal vertikal yang membagi bumi menjadi belahan barat dan timur disebut...", a: "Garis Khatulistiwa", b: "Garis Lintang", c: "Garis bujur", d: "Garis Weber", ans: "c" },
+            { q: "Komponen peta yang berfungsi menunjukkan perbandingan jarak pada peta dengan jarak sesungguhnya adalah...", a: "index Peta", b: "Legenda", c: "Orientasi Utara", d: "skala Peta", ans: "d" },
+            { q: "Indonesia memiliki iklim tropis disebabkan oleh letak...", a: "Astronomis", b: "Geologis", c: "Geografis", d: "Ekonomis", ans: "a" },
+            { q: "Hutan mangrove memiliki fungsi ekologis utama yaitu...", a: "Mencegah abrasi pantai", b: "Menghasilkan kayu gelondongan", c: "Tempat penambangan pasir", d: "Pusat wisata modern", ans: "a" },
+            { q: "Bahan tambang golongan A yang strategis bagi pertahanan dan keamanan negara contohnya...", a: "Minyak bumi dan perak", b: "Emas dan gas bumi", c: "Pasir kuarsa", d: "Batu kapur", ans: "b" },
+            { q: "Berikut ini yang termasuk pengaruh letak geologis Indonesia adalah...", a: "Banyak memiliki gunung api aktif", b: "Memiliki tiga zona waktu", c: "Beriklim muson tropis", d: "Menjadi jalur perdagangan dunia", ans: "a" },
+            
+            // Ekonomi
+            { q: "Masalah ekonomi inti yang dihadapi manusia di mana kebutuhan tidak terbatas sedangkan alat pemuas terbatas disebut...", a: "Kemiskinan", b: "Kelangkaan", c: "Konsumsi", d: "Distribusi", ans: "b" },
+            { q: "Kebutuhan pokok yang harus dipenuhi manusia demi kelangsungan hidupnya disebut kebutuhan...", a: "Primer", b: "Sekunder", c: "Tersier", d: "Jasmani", ans: "a" },
+            { q: "Kegiatan menambah atau menciptakan nilai guna suatu barang/jasa disebut...", a: "konsumen", b: "Distribusi", c: "Konsumsi", d: "produksi", ans: "d" },
+            { q: "Pihak atau badan yang menyalurkan barang dari produsen menuju konsumen disebut...", a: "Distributor", b: "Agen retail", c: "Konsumen aktif", d: "Makelar saham", ans: "a" },
+            { q: "Contoh motif ekonomi yang paling mulia di bawah ini adalah...", a: "Membantu sesama korban bencana", b: "Mendapat laba sebesar-besarnya", c: "Memperoleh pujian warga", d: "Menguasai sektor pasar", ans: "a" },
+            { q: "Barang yang jumlahnya terbatas dan butuh pengorbanan ekonomi untuk mendapatkannya disebut barang...", a: "Substansi", b: "Bebas", c: "Ekonomi", d: "Pasar Ekonomi", ans: "c" },
+
+            // Sejarah
+            { q: "Masa di mana manusia purba belum mengenal tulisan dinamakan masa...", a: "Praaksara", b: "Hindu-Buddha", c: "Kolonialisme", d: "Paleolitikum", ans: "a" },
+            { q: "Teori yang menyatakan bahwa penyebaran agama Hindu dibawa oleh kaum pendeta/para cendekiawan dinamakan teori...", a: "Ksatria", b: "Brahmana", c: "Waisya", d: "Sudra", ans: "b" },
+            { q: "Kerajaan Hindu tertua di Indonesia yang dibuktikan dengan penemuan prasasti Yupa adalah...", a: "Sriwijaya", b: "Tarumanegara", c: "Majapahit", d: "Kutai", ans: "d" },
+            { q: "Kerajaan Sriwijaya berkembang pesat menjadi kerajaan maritim terbesar karena menguasai urat nadi perdagangan laut yaitu...", a: "Selat Malaka", b: "Selat Sunda", c: "Selat Makassar", d: "Laut Jawa", ans: "a" },
+            { q: "Raja terkenal dari Majapahit yang didampingi Patih Gajah Mada dalam menyatukan Nusantara bernama...", a: "Hayam Wuruk", b: "Raden Wijaya", c: "Ken Arok", d: "Mulawarman", ans: "a" },
+            { q: "Kerajaan Islam pertama di pulau Jawa yang didirikan oleh Raden Patah adalah...", a: "Banten", b: "Samudera Pasai", c: "demak", d: "Mataram Islam", ans: "c" },
+            { q: "Seni pertunjukan wali songo yang digunakan secara efektif menyebarkan Islam di Jawa adalah...", a: "Wayang Kulit", b: "Ketoprak", c: "Seni Tari Kecak", d: "Ludruk", ans: "a" }
+        ];
+
+        // --- GAME SYSTEM CONFIGS & VARIABLES ---
+        let gameMode = 'solo'; // solo, duel, squad
+        let playersState = [];
+        let globalAudioCtx = null;
+        let isMuted = false;
+
+        // Initialize highscore database via localStorage
+    if(!localStorage.getItem('foggy_highscores')) 
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderMiniLeaderboard();
+            setupVolumeSlider();
+        });
+
+        // --- WEB AUDIO API SYNTHESIZER SOUND EFFECTS ---
+        function initAudio() {
+            if (!globalAudioCtx) {
+                globalAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playTone(freq, type, duration, startTimeOffset = 0) {
+            if (isMuted || !globalAudioCtx) return;
+            try {
+                let osc = globalAudioCtx.createOscillator();
+                let gainNode = globalAudioCtx.createGain();
+                
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, globalAudioCtx.currentTime + startTimeOffset);
+                
+                gainNode.gain.setValueAtTime(0.2, globalAudioCtx.currentTime + startTimeOffset);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, globalAudioCtx.currentTime + startTimeOffset + duration);
+                
+                osc.connect(gainNode);
+                gainNode.connect(globalAudioCtx.destination);
+                
+                osc.start(globalAudioCtx.currentTime + startTimeOffset);
+                osc.stop(globalAudioCtx.currentTime + startTimeOffset + duration);
+            } catch(e) { console.log(e); }
+        }
+
+        function playSound(type) {
+            initAudio();
+            if(type === 'correct') {
+                playTone(523.25, 'sine', 0.1, 0); // C5
+                playTone(659.25, 'sine', 0.1, 0.08); // E5
+                playTone(783.99, 'sine', 0.2, 0.16); // G5
+            } else if(type === 'wrong') {
+                playTone(293.66, 'sawtooth', 0.2, 0); // D4
+                playTone(220.00, 'sawtooth', 0.3, 0.1); // A3
+            } else if(type === 'splash') {
+                playTone(150, 'triangle', 0.4, 0);
+                playTone(90, 'sine', 0.5, 0.1);
+            } else if(type === 'win_game') {
+                let melody = [523, 587, 659, 698, 783, 880, 987, 1046];
+                melody.forEach((f, i) => playTone(f, 'sine', 0.15, i * 0.1));
+            }
+        }
+
+        function toggleAudio() {
+            isMuted = !isMuted;
+            document.getElementById('audio-toggle').innerText = isMuted ? "🔇" : "🔊";
+        }
+
+        function setupVolumeSlider() {
+            document.getElementById('volume-control').addEventListener('input', (e) => {
+                if(e.target.value == 0) { isMuted = true; document.getElementById('audio-toggle').innerText = "🔇"; }
+                else { isMuted = false; document.getElementById('audio-toggle').innerText = "🔊"; }
+            });
+        }
+
+        // --- FULLSCREEN UTILITY API ---
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {});
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // --- CORE LOGIC CONTROLLER ---
+        function renderMiniLeaderboard() {
+            const container = document.getElementById('leaderboard-container');
+            const data = JSON.parse(localStorage.getItem('foggy_highscores')) || [];
+            container.innerHTML = data.map((item, index) => `
+                <div>
+                    <span>${index+1}. ${item.name}</span>
+                    <span>${item.score} Pts (${item.accuracy}%)</span>
+                </div>
+            `).join('');
+        }
+
+        function shuffleArray(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function backToMenu() {
+            // Clean up intervals
+            playersState.forEach(p => clearInterval(p.timerInterval));
+            
+            document.getElementById('gameover-screen').style.display = 'none';
+            document.getElementById('game-screen').style.opacity = 0;
+            setTimeout(() => {
+                document.getElementById('game-screen').style.display = 'none';
+                document.getElementById('menu-screen').style.display = 'flex';
+                renderMiniLeaderboard();
+            }, 300);
+        }
+
+        function startGame(mode) {
+            initAudio();
+            gameMode = mode;
+            document.getElementById('menu-screen').style.display = 'none';
+            
+            const gameScreen = document.getElementById('game-screen');
+            const arenaBox = document.getElementById('arena-box');
+            
+            gameScreen.style.display = 'block';
+            gameScreen.style.opacity = 1;
+            
+            // Apply Layout CSS Grid Modes
+            arenaBox.className = "arena-container mode-" + mode;
+            arenaBox.innerHTML = "";
+
+            let playerCount = 1;
+            if(mode === 'duel') playerCount = 3;
+            if(mode === 'squad') playerCount = 4;
+
+            playersState = [];
+
+            for(let i = 1; i <= playerCount; i++) {
+                let shuffledQuestions = shuffleArray([...bankSoal]);
+                playersState.push({
+                    id: i,
+                    name: "Pemain " + i,
+                    questions: shuffledQuestions,
+                    currentIdx: 0,
+                    score: 0,
+                    lives: 3,
+                    combo: 0,
+                    correctAnswers: 0,
+                    totalAnswered: 0,
+                    timer: 15,
+                    timerInterval: null
+                });
+
+                buildPlayerPanel(i, mode);
+                generateQuestion(i);
+            }
+        }
+
+        function buildPlayerPanel(pId, mode) {
+            const arenaBox = document.getElementById('arena-box');
+            const colors = ['', 'p1-frog', 'p2-frog', 'p3-frog', 'p4-frog'];
+            
+            const panel = document.createElement('div');
+            panel.className = 'player-panel';
+            panel.id = `panel-p${pId}`;
+
+            panel.innerHTML = `
+                <div class="player-label">${gameMode !== 'solo' ? 'PEMAIN ' + pId : 'MODE SOLO'}</div>
+                <div class="panel-status">
+                    <div id="p${pId}-score">Skor: 0</div>
+                    <div id="p${pId}-combo" style="color:var(--accent-color)">Combo: 0</div>
+                    <div class="status-life" id="p${pId}-lives">❤️❤️❤️</div>
+                    <div class="status-timer" id="p${pId}-timer">⏱️ 15s</div>
+                </div>
+                <div class="question-box" id="p${pId}-question">Memuat soal...</div>
+                
+                <div class="playing-space" id="p${pId}-space">
+                    <div class="splash-overlay" id="p${pId}-splash-zone"></div>
+                    
+                    <div class="frog-container" id="p${pId}-frog-container">
+                        <div class="frog idle ${colors[pId]}" id="p${pId}-frog">
+                            <div class="frog-body">
+                                <div class="frog-eye left"></div>
+                                <div class="frog-eye right"></div>
+                                <div class="frog-mouth"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lotus-grid" id="p${pId}-lotus-grid"></div>
+                </div>
+
+                <div class="mobile-controls-row">
+                    <button class="btn-control" onclick="handleInput(${pId}, 'a')">A</button>
+                    <button class="btn-control" onclick="handleInput(${pId}, 'b')">B</button>
+                    <button class="btn-control" onclick="handleInput(${pId}, 'c')">C</button>
+                    <button class="btn-control" onclick="handleInput(${pId}, 'd')">D</button>
+                </div>
+            `;
+            arenaBox.appendChild(panel);
+        }
+
+        // --- INTERACTIVE SOAL ENGINE ENGINE ---
+        function generateQuestion(pId) {
+            const p = playersState[pId - 1];
+            clearInterval(p.timerInterval);
+
+            if(p.lives <= 0 || p.currentIdx >= p.questions.length || p.currentIdx >= 50) {
+                checkGameEndCondition();
+                return;
+            }
+
+            p.timer = 15;
+            document.getElementById(`p${pId}-timer`).innerText = `⏱️ ${p.timer}s`;
+            
+            p.timerInterval = setInterval(() => {
+                p.timer--;
+                document.getElementById(`p${pId}-timer`).innerText = `⏱️ ${p.timer}s`;
+                if(p.timer <= 0) {
+                    processAnswer(pId, 'timeout');
+                }
+            }, 1000);
+
+            const qItem = p.questions[p.currentIdx];
+            
+            // UI text reduction optimization for small mobile devices
+            let cleanQuestion = qItem.q;
+            if(window.innerWidth < 600 && cleanQuestion.length > 65) {
+                cleanQuestion = cleanQuestion.substring(0, 62) + "...";
+            }
+            document.getElementById(`p${pId}-question`).innerText = cleanQuestion;
+
+            // Generate layout choices randomized positionally mapping
+            const choices = [
+                { key: 'a', text: qItem.a },
+                { key: 'b', text: qItem.b },
+                { key: 'c', text: qItem.c },
+                { key: 'd', text: qItem.d }
+            ];
+
+            const grid = document.getElementById(`p${pId}-lotus-grid`);
+            grid.innerHTML = "";
+            
+            choices.forEach(c => {
+                const leaf = document.createElement('div');
+                leaf.className = 'lotus-leaf';
+                leaf.id = `p${pId}-leaf-${c.key}`;
+                leaf.innerText = c.text;
+                leaf.onclick = () => handleInput(pId, c.key);
+                grid.appendChild(leaf);
+            });
+
+            // Return Frog Graphic to Base Position Node Animation state
+            const frogContainer = document.getElementById(`p${pId}-frog-container`);
+            frogContainer.style.bottom = "25%";
+            frogContainer.style.left = "50%";
+            frogContainer.style.transform = "translateX(-50%)";
+            
+            const frog = document.getElementById(`p${pId}-frog`);
+            frog.className = "frog idle " + (pId==1?'p1-frog':pId==2?'p2-frog':pId==3?'p3-frog':'p4-frog');
+        }
+
+        function handleInput(pId, selectedKey) {
+            const p = playersState[pId - 1];
+            if(p.timer <= 0 || p.lives <= 0) return; // Prevent double trigger
+            clearInterval(p.timerInterval);
+            processAnswer(pId, selectedKey);
+        }
+
+        // --- ANIMATIONS & VERDICTS INTERACTION SYSTEMS ---
+        function processAnswer(pId, selectedKey) {
+            const p = playersState[pId - 1];
+            const qItem = p.questions[p.currentIdx];
+            p.totalAnswered++;
+
+            const frogContainer = document.getElementById(`p${pId}-frog-container`);
+            const frog = document.getElementById(`p${pId}-frog`);
+            
+            if(selectedKey === 'timeout') {
+                playSound('wrong');
+                p.lives--;
+                p.combo = 0;
+                updatePanelStatusHeaders(pId);
+                triggerWeatherRainEffect();
+                nextQuestionSequence(pId);
+                return;
+            }
+
+            const targetLeaf = document.getElementById(`p${pId}-leaf-${selectedKey}`);
+            
+            // Move Frog Node directly structurally over the lotus choice leaf
+            if(targetLeaf) {
+                targetLeaf.classList.add('selected');
+                const rectLeaf = targetLeaf.getBoundingClientRect();
+                const rectSpace = document.getElementById(`p${pId}-space`).getBoundingClientRect();
+                
+                let targetX = rectLeaf.left + (rectLeaf.width/2) - rectSpace.left;
+                let targetY = rectSpace.bottom - rectLeaf.top - (rectLeaf.height/2);
+
+                frogContainer.style.bottom = targetY + "px";
+                frogContainer.style.left = targetX + "px";
+                frog.classList.remove('idle');
+                frog.classList.add('jump-anim');
+            }
+
+            setTimeout(() => {
+                if(selectedKey === qItem.ans) {
+                    // --- CORRECT ROUTINE SYSTEM ---
+                    playSound('correct');
+                    if(targetLeaf) targetLeaf.classList.add('correct');
+                    
+                    p.correctAnswers++;
+                    p.combo++;
+                    
+                    let baseReward = 10;
+                    if(p.combo >= 5) baseReward += 50;
+                    else if(p.combo >= 3) baseReward += 20;
+                    
+                    p.score += baseReward;
+                    
+                    setTimeout(() => {
+                        frog.classList.remove('jump-anim');
+                        frog.classList.add('happy-anim');
+                    }, 100);
+
+                } else {
+                    // --- WRONG ROUTINE SYSTEM ---
+                    playSound('wrong');
+                    if(targetLeaf) targetLeaf.classList.add('wrong');
+                    
+                    p.lives--;
+                    p.combo = 0;
+                    p.score = Math.max(0, p.score - 5);
+
+                    setTimeout(() => {
+                        playSound('splash');
+                        createWaterSplashParticles(pId, frogContainer.offsetLeft, frogContainer.offsetTop);
+                        frog.classList.remove('jump-anim');
+                        frog.classList.add('fall-anim');
+                        if(targetLeaf) targetLeaf.classList.add('sink-away');
+                    }, 200);
+
+                    triggerWeatherRainEffect();
+                }
+
+                updatePanelStatusHeaders(pId);
+
+                setTimeout(() => {
+                    p.currentIdx++;
+                    generateQuestion(pId);
+                }, 1200);
+
+            }, 350);
+        }
+
+        function updatePanelStatusHeaders(pId) {
+            const p = playersState[pId - 1];
+            document.getElementById(`p${pId}-score`).innerText = `Skor: ${p.score}`;
+            document.getElementById(`p${pId}-combo`).innerText = `Combo: ${p.combo}`;
+            
+            let heartStr = "";
+            for(let i=0; i<3; i++) heartStr += (i < p.lives) ? "❤️" : "🖤";
+            document.getElementById(`p${pId}-lives`).innerText = heartStr;
+        }
+
+        function createWaterSplashParticles(pId, x, y) {
+            const zone = document.getElementById(`p${pId}-splash-zone`);
+            for(let i=0; i<15; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'splash-particle';
+                particle.style.left = x + "px";
+                particle.style.top = y + "px";
+                
+                let size = Math.random() * 8 + 4;
+                particle.style.width = size + "px";
+                particle.style.height = size + "px";
+
+                let angle = Math.random() * Math.PI * 2;
+                let speed = Math.random() * 60 + 20;
+                particle.style.setProperty('--x', Math.cos(angle) * speed + "px");
+                particle.style.setProperty('--y', Math.sin(angle) * speed - Math.random()*40 + "px");
+
+                zone.appendChild(particle);
+                setTimeout(() => particle.remove(), 600);
+            }
+        }
+
+        function triggerWeatherRainEffect() {
+            const rainZone = document.getElementById('rain-zone');
+            rainZone.style.display = 'block';
+            setTimeout(() => {
+                rainZone.style.display = 'none';
+            }, 2500);
+        }
+
+        // --- EVENT TRIGGER RULES FOR WIN/LOSS CHECKER ---
+        function checkGameEndCondition() {
+            let allDeadOrDone = playersState.every(p => p.lives <= 0 || p.currentIdx >= p.questions.length || p.currentIdx >= 50);
+            if(allDeadOrDone) {
+                endGameSession();
+            }
+        }
+
+        function endGameSession() {
+            playersState.forEach(p => clearInterval(p.timerInterval));
+            playSound('win_game');
+
+            const overlay = document.getElementById('gameover-screen');
+            const title = document.getElementById('go-title');
+            const body = document.getElementById('go-body');
+            
+            overlay.style.display = 'flex';
+
+            if(gameMode === 'solo') {
+                let p = playersState[0];
+                let acc = p.totalAnswered > 0 ? Math.round((p.correctAnswers / p.totalAnswered) * 100) : 0;
+                title.innerText = "Permainan Selesai!";
+                body.innerHTML = `
+                    <p>Skor Akhir Anda: <strong>${p.score}</strong></p>
+                    <p>Akurasi Jawaban: <strong>${acc}%</strong></p>
+                    <p>Menjawab ${p.correctAnswers} dari ${p.totalAnswered} soal.</p>
+                `;
+
+                // Save Highscore logic
+                let nameInput = prompt("Permainan Selesai! Masukkan nama kamu untuk papan peringkat:", "Siswa Hebat");
+                if(nameInput) {
+                    let records = JSON.parse(localStorage.getItem('foggy_highscores')) || [];
+                    records.push({name: nameInput.substring(0,12), score: p.score, accuracy: acc});
+                    records.sort((a,b) => b.score - a.score);
+                    records = records.slice(0, 5); // top 5 only
+                    localStorage.setItem('foggy_highscores', JSON.stringify(records));
+                }
+            } else {
+                // Multiplayer ranking algorithms calculation logic
+                title.innerText = "Hasil Kompetisi!";
+                let sorted = [...playersState].sort((a,b) => b.score - a.score);
+                let rankStr = "<table style='width:100%; text-align:left; border-collapse:collapse;'>";
+                rankStr += "<tr style='border-bottom:2px solid #fff'><th>Rank</th><th>Pemain</th><th>Skor</th><th>Akurasi</th></tr>";
+                sorted.forEach((p, idx) => {
+                    let acc = p.totalAnswered > 0 ? Math.round((p.correctAnswers / p.totalAnswered) * 100) : 0;
+                    rankStr += `<tr style='border-bottom:1px solid #444'>
+                        <td>#${idx+1}</td>
+                        <td>Pemain ${p.id}</td>
+                        <td><strong>${p.score}</strong></td>
+                        <td>${acc}%</td>
+                    </tr>`;
+                });
+                rankStr += "</table>";
+                body.innerHTML = rankStr;
+            }
+        }
+
+        // --- MASTER GLOBAL CROSS PLAYER KEYBOARD BINDINGS FOR DESKTOP STABILITY ---
+        window.addEventListener('keydown', (e) => {
+            if(gameMode === 'solo' && playersState[0]) {
+                if(e.key === 'a' || e.key === 'A') handleInput(1, 'a');
+                if(e.key === 'b' || e.key === 'B') handleInput(1, 'b');
+                if(e.key === 'c' || e.key === 'C') handleInput(1, 'c');
+                if(e.key === 'd' || e.key === 'D') handleInput(1, 'd');
+            }
+            // Multi-control setups bind mapping can naturally extend into number/alt layouts easily
+        });
+    </script>
+</body>
+</html>
